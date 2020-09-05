@@ -5,11 +5,10 @@
 #include <netinet/in.h>
 #include <dirent.h>
 #define PORT 9001
-void error(char *message)
-{
-	perror(message);
-	exit(0);
-}
+
+void error(char *message);
+int check_file(char *filename);
+void send_file(FILE *fp, int server_socket);
 
 int main(){
 	int server_socket;
@@ -41,7 +40,7 @@ int main(){
     }
     printf("Server Online\n");
 
-    char buffer[256] = {};
+    char buffer[256] = {0};
     client_socket = accept(server_socket, (struct sockaddr *)&address_socket, (socklen_t *)&addLen);
 
     if(client_socket < 0)
@@ -57,6 +56,39 @@ int main(){
 	printf("Client : %s\n", buffer);
 	 
 	// printf("Enter Text to send w/o space\n");
+	int file_c = check_file(buffer);
+	if(file_c == 0)
+	{
+		error("File Not Found : Invalid Filename.\n");
+	}
+	// send(client_socket, textToSend, strlen(textToSend), 0);
+	 
+	char fileToSend[5000] = {0};
+	FILE *fp;
+	char PATH[512] = "shared_drive/";
+	strcat(PATH, buffer);
+
+	printf("File PATH : %s\n",	PATH );
+
+	fp = fopen(PATH,"r");
+
+	printf("%s\n", fileToSend);
+
+	send_file(fp, server_socket);
+
+	close(fp);
+	close(server_socket);
+
+}
+
+void error(char *message)
+{
+	perror(message);
+	exit(1);
+}
+
+int check_file(char *filename)
+{
 	struct dirent *de;
 
 	DIR *dr = opendir("shared_drive");
@@ -66,15 +98,38 @@ int main(){
 		error("Could not open directory. \n");
 	}
 
-	while ((de = readdir(dr)) != NULL) 
-            printf("%s\n", de->d_name); 
+	while ((de = readdir(dr)) != NULL){
+		     // printf("%s\n", de->d_name); 
+		     // printf("%d\n", strcmp(de->d_name,filename));
+		     if(strcmp(de->d_name,filename) == 0)
+		     {
+		     	printf("File found : %s  \n", filename );
+		     	return 1;
+		     }
+
+
+	} 
   
     closedir(dr);
+    return 0;
 
-	// send(client_socket, textToSend, strlen(textToSend), 0);
-	 
-	 
-	 
-	close(client_socket);
+}
 
+void send_file(FILE *fp, int server_socket)
+{
+	if(fp == NULL) error("File cannot be opened.\n");
+	int n;
+
+    char data[512] = {0}; 
+    while ((n = fread(data, sizeof(char), 512, fp)) > 0) 
+    {
+	    
+        // printf("%s\n", data);
+        if (send(server_socket, "data", n, 0) < 0)
+        {
+            error("Error Sending file to client");
+        }
+        bzero(data,512);
+    }
+	
 }
