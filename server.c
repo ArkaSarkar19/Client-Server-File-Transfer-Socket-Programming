@@ -8,7 +8,7 @@
 
 void error(char *message);
 int check_file(char *filename);
-void send_file(FILE *fp, int server_socket);
+void send_file(FILE *fp, int client_socket);
 
 int main(){
 	int server_socket;
@@ -55,13 +55,12 @@ int main(){
     }
 	printf("Client : %s\n", buffer);
 	 
-	// printf("Enter Text to send w/o space\n");
 	int file_c = check_file(buffer);
 	if(file_c == 0)
 	{
 		error("File Not Found : Invalid Filename.\n");
 	}
-	// send(client_socket, textToSend, strlen(textToSend), 0);
+	// send(client_socket, "textToSend", strlen("textToSend"), 0);
 	 
 	char fileToSend[5000] = {0};
 	FILE *fp;
@@ -74,7 +73,11 @@ int main(){
 
 	printf("%s\n", fileToSend);
 
-	send_file(fp, server_socket);
+	char stash[100] = {0};
+	// printf("Press Enter to Continue");
+	// while( getchar() != '\n' );
+
+	send_file(fp, client_socket);
 
 	close(fp);
 	close(server_socket);
@@ -99,7 +102,7 @@ int check_file(char *filename)
 	}
 
 	while ((de = readdir(dr)) != NULL){
-		     // printf("%s\n", de->d_name); 
+		     // printf("%s\n", de->d_sockname); 
 		     // printf("%d\n", strcmp(de->d_name,filename));
 		     if(strcmp(de->d_name,filename) == 0)
 		     {
@@ -115,7 +118,7 @@ int check_file(char *filename)
 
 }
 
-void send_file(FILE *fp, int server_socket)
+void send_file(FILE *fp, int client_socket)
 {
 	if(fp == NULL) error("File cannot be opened.\n");
 	int n;
@@ -124,8 +127,8 @@ void send_file(FILE *fp, int server_socket)
     while ((n = fread(data, sizeof(char), 512, fp)) > 0) 
     {
 	    
-        // printf("%s\n", data);
-        if (send(server_socket, "data", n, 0) < 0)
+        printf("%s\n", data);
+        if (send(client_socket, data, n, 0) < 0)
         {
             error("Error Sending file to client");
         }
