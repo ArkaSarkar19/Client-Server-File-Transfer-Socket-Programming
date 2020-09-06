@@ -86,7 +86,7 @@ void recieve_file(int socket_server, FILE *fp)
 	}
 	// printf("%s\n", data);
 	int write_status = fwrite(data, sizeof(char), rec_status, fp);
-	// if(write_bits < ) error("Error in writing File.\n");
+	if(write_status < 0 ) error("Error in writing File.\n");
 	bzero(data,1024);
 }
 	
