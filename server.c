@@ -81,6 +81,7 @@ int main(){
 
 	close(fp);
 	close(server_socket);
+	close(client_socket);
 
 }
 
@@ -123,8 +124,8 @@ void send_file(FILE *fp, int client_socket)
 	if(fp == NULL) error("File cannot be opened.\n");
 	int n;
 
-    char data[512] = {0}; 
-    while ((n = fread(data, sizeof(char), 512, fp)) > 0) 
+    char data[1024] = {0}; 
+    while ((n = fread(data, sizeof(char), 1024, fp)) > 0) 
     {
 	    
         printf("%s\n", data);
@@ -132,7 +133,12 @@ void send_file(FILE *fp, int client_socket)
         {
             error("Error Sending file to client");
         }
-        bzero(data,512);
+        bzero(data,1024);
+    }
+
+    if (send(client_socket, "end_of_file", sizeof("end_of_file"), 0) < 0)
+    {
+    	error("Error sending EOF.\n");
     }
 	
 }

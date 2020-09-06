@@ -67,18 +67,28 @@ void error(char *message)
 
 void recieve_file(int socket_server, FILE *fp)
 {
-	char data[512] = {0};
+	char data[1024] = {0};
+	int rec_status;
+	while((rec_status = recv(socket_server, data, 1024,0) )> 0){
 
-	int bits = recv(socket_server, data, 512,0);
-	if(bits < 0)
+	if(rec_status < 0)
 	{
 		error("Error in recieving File.\n");
-		// break;
+		break;
+		return;
+	}
+	// printf("%s%d\n", data,strcmp(data, "end_of_file"));
+	// printf("%s\n", data);
+	if(strcmp(data, "end_of_file") == 0)
+	{
+		break;
 		return;
 	}
 	// printf("%s\n", data);
-	int write_bits = fwrite(data, sizeof(char), bits, fp);
-	if(write_bits!=bits) error("Error in writing File.\n");
-	bzero(data,512);
+	int write_status = fwrite(data, sizeof(char), rec_status, fp);
+	// if(write_bits < ) error("Error in writing File.\n");
+	bzero(data,1024);
+}
 	
 }
+
