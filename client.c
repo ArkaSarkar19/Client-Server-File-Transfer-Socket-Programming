@@ -45,6 +45,13 @@ int main()
     }
 
     printf("File name sent\n");
+    char file_status[256] = {0};
+    if (recv(socket_server, file_status, 256,0) < 0)
+    	{
+    		error("Error recieving file status.\n");
+    	}
+    if(strcmp(file_status, "File_Not_Found") == 0) error("File Not Found on server.\n");
+    if(strcmp(file_status, "File_Found") == 0) printf("File found ");
 
     printf("Now recieving File.\n");
 

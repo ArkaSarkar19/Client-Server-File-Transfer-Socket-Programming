@@ -58,9 +58,16 @@ int main(){
 	int file_c = check_file(buffer);
 	if(file_c == 0)
 	{
-		error("File Not Found : Invalid Filename.\n");
+		if (send(client_socket, "File_Not_Found", sizeof("File_Not_Found"), 0) < 0)
+    	{
+    		error("File Not Found : Invalid Filename.\n");
+    	}
 	}
 	// send(client_socket, "textToSend", strlen("textToSend"), 0);
+	if (send(client_socket, "File_Found", sizeof("File_Found"), 0) < 0)
+    	{
+    		error("Error sending File status.\n");
+    	}
 	 
 	char fileToSend[5000] = {0};
 	FILE *fp;
